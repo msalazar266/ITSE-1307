@@ -32,7 +32,7 @@ public:
 	void setBet(int intpBet);
 	int getBet();
 	int inputPlayerBet();
-	void WinBet(double intpBetAmount);
-	void LoseBet(double intpBetAmount);
-	void Blackjack(double intpBetAmount);
+	void WinBet(double dblpBetAmount);
+	void LoseBet(double dblpBetAmount);
+	void Blackjack(double dblpBetAmount);
 };

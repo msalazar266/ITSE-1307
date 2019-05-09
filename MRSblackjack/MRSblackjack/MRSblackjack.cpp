@@ -35,159 +35,195 @@ int main()
 	Deck objDeck = Deck(4);
 	string strName = "";
 	char chrPlay = ' ';
-	char chrHit = ' ';
+	char chrHitStay = ' ';
 	char chrPlayAgain = ' ';
-	double dblBuyInAmount = 0;
-	double dblBetAmount = 0;
+	int intBuyInAmount = 0;
+	int intBetAmount = 0;
 
-	//Intro display and name input.
-	cout << "Want to play Blackjack? Yeh, Okay cool? Yes(Y/y) or No(N/n)";
+	objDeck.shuffle();	//Deck is shuffled
+	
+	//Intro display
+	cout << "Want to play Blackjack? Yeh, Okay cool? Yes(Y/y) or No(N/n)";	//Asks user if they want to play
 	cin >> chrPlay;
 	tolower(chrPlay);
 	cout << endl << endl;
 	cout << "************************************************** " << endl;
+	
 	if (chrPlay == 'n') {	//Either way, you'll play
 		cout << "Nope you're playing." << endl;
 		chrPlay = 'y';
 		cout << endl << endl;
-		//exit(chrPlay == 'n');
 	}
 
-	objDealer.setPlayerName("DEALER");
+	objDealer.setPlayerName("DEALER");	//Dealer name set to DEALER
 
-	cout << "Enter your name: ";
+	cout << "Enter your name for this game: ";	//Use inputs their name
 	cin >> strName;
-	objPlayer.setPlayerName(strName);
+	objPlayer.setPlayerName(strName);	//Players name set to the previous input
 	cout << endl << endl;
-	cout << "************************************************** " << endl;
+	
+	//Buy in input and validation
+	do {
 
-	cout << "Enter your buy in amount: $";
-	cin >> dblBuyInAmount;
-	objPlayer.setMoney(dblBuyInAmount);
-	cout << endl << endl;
-	cout << "************************************************** " << endl;
+		cout << "Enter your buy in amount($0 - $50000): $";	//Asks user for a buy in amount
+		cin >> intBuyInAmount;
+		cout << endl << endl;
 
-	objDeck.shuffle();
+		if (cin.fail()) {	// User didn't input a number
+			cout << "Error! Please enter a vaild amount!" << endl;
+			cin.clear();
+			cin.ignore(256, '\n');
+			cin >> intBuyInAmount;
+		}
 
-	//Main part of game.
+		objPlayer.setMoney(intBuyInAmount);	//Buy in amount is set to previous input
+		objDealer.setMoney(intBuyInAmount);	//Dealer amount of money is set to previous input
+
+	} while (cin.fail() == true);
+
+	//Main part of game
 	while (chrPlay == 'y') {
 		objDealer.clearHand();
 		objPlayer.clearHand();
 
-		cout << "You have $" << objPlayer.getMoney() << endl;
+		cout << "DEALER has $" << objPlayer.getMoney() << endl;
+		cout << "You have $" << objDealer.getMoney() << endl;
 		cout << endl << endl;
-		cout << "************************************************** " << endl;
-
+		
+		//Bet input and validation
 		do {
-			cout << "Place your bet: $";
-			cin >> dblBetAmount;
+			cout << "Place your bet: $";	//Asks user for bet
+			cin >> intBetAmount;
 			cout << endl << endl;
-			cout << "************************************************** " << endl;
+			
 
-			if (!cin) {
-				cout << "No, number..";
-				cout << endl << endl;
-				cout << "************************************************** " << endl;
+			if (cin.fail()) {	// User didn't input a number
+				cout << "Error! Please enter a vaild amount!" << endl;
+				cin.clear();
+				cin.ignore(256, '\n');
+				cin >> intBetAmount;
 			}
 
-			objPlayer.setBet(dblBetAmount);
+			objPlayer.setBet(intBetAmount);	//Bet amount set to previous input
 
-		} while (dblBetAmount > objPlayer.getMoney());
+		} while (intBetAmount > objPlayer.getMoney());
 
-		for (int intFirstTwoCards = 1; intFirstTwoCards <= 2; intFirstTwoCards++) {
+		for (int intFirstTwoCards = 1; intFirstTwoCards <= 2; intFirstTwoCards++) {	//Cards dealt
 			objDealer.addCard(objDeck.getCard());
 			objPlayer.addCard(objDeck.getCard());
 		}
 
-		while (objDealer.getHandPointValue() <= 16 && objDealer.getNumberCards() < 5) {
+		while (objDealer.getHandPointValue() <= 16 && objDealer.getNumberCards() < 5) {	//Dealer gets cards while point value is less than 16 and can't have more than 5 cards
 			objDealer.addCard(objDeck.getCard());
 		}
 
 		cout << objDealer.toString() << endl;	//Outputs dealer hand
 		cout << objPlayer.toString() << endl;	//Outputs player hand
 
-		if (objPlayer.getHandPointValue() == 21) {	//Player gets 21 initally
+		//If player gets 21 initally
+		if (objPlayer.getHandPointValue() == 21) {
 			cout << "BLACKJACK!" << endl;
-			objPlayer.Blackjack(dblBetAmount);
+			objPlayer.Blackjack(intBetAmount);
+			objDealer.LoseBet(intBetAmount * 1.5);
 			cout << endl << endl;
-			cout << "************************************************** " << endl;
+			
+			chrHitStay = 's';
 		}
 
-		//To hit or not to hit
+		//Asks user for hit or stay
 		do {
 			cout << endl << endl;
-			cout << "Hit? Yes(Y/y) or No(N/n)";
-			cin >> chrHit;
-			chrHit = tolower(chrHit);
+			cout << "Hit(H/h) or Stay(S/s)?";
+			cin >> chrHitStay;
+			chrHitStay = tolower(chrHitStay);
 			cout << endl << endl;
-			cout << "************************************************** " << endl;
+			
+			//Hit or stay options
+			switch (chrHitStay) {
 
-			if (chrHit == 'y') {	//Player hits
+			case 'h':	//Player hits
+				cout << objPlayer.getPlayerName() << " HITS!\n" << endl;
 				objPlayer.addCard(objDeck.getCard());
-			}
+				break;
 
+			case 's': //Player stays
+				cout << objPlayer.getPlayerName() << " STAYS!\n" << endl;
+				break;
+			}
+		
 			cout << objDealer.toString() << endl;	//Outputs dealer hand
 			cout << objPlayer.toString() << endl;	//Outputs player hand
+			
+		} while (chrHitStay == 'h');
 
-
-		} while (chrHit == 'y');
-
-
-		if (objDeck.shouldShuffle()) {	//Deck will shuffle if need be
+		//Deck will shuffle if need be
+		if (objDeck.shouldShuffle()) {
 			objDeck.shuffle();
 		}
-		//Point value check
+		//Point value check for winner(s)
 		if (objDealer.getHandPointValue() <= 21 && objPlayer.getHandPointValue() <= 21) {
 			if (objDealer.getHandPointValue() > objPlayer.getHandPointValue()) {	//Dealer wins
-				cout << "Dealer wins!" << endl;
-				objPlayer.LoseBet(dblBetAmount);
+				cout << "\nDEALER WINS!" << endl;
+				objPlayer.LoseBet(intBetAmount);
+				objDealer.WinBet(intBetAmount);
 				cout << endl << endl;
-				cout << "************************************************** " << endl;
 			}
 			if (objDealer.getHandPointValue() < objPlayer.getHandPointValue()) {	//Player wins
-				cout << "You win!" << endl;
-				objPlayer.WinBet(dblBetAmount);
+				cout << "\nYOU WIN!" << endl;
+				objPlayer.WinBet(intBetAmount);
 				cout << endl << endl;
-				cout << "************************************************** " << endl;
 			}
 		}
 		else if (objDealer.getHandPointValue() <= 21 && objPlayer.getHandPointValue() > 21) {	//Dealer wins
-			cout << "Dealer wins!" << endl;
-			objPlayer.LoseBet(dblBetAmount);
+			cout << "\nDEALER WINS!" << endl;
+			objPlayer.LoseBet(intBetAmount);
+			objDealer.WinBet(intBetAmount);
 			cout << endl << endl;
-			cout << "************************************************** " << endl;
 		}
 		else if (objDealer.getHandPointValue() > 21 && objPlayer.getHandPointValue() > 21) {	//Dealer wins
-			cout << "Dealer wins!" << endl;
-			objPlayer.LoseBet(dblBetAmount);
+			cout << "\nDEALER WINS!" << endl;
+			objPlayer.LoseBet(intBetAmount);
+			objDealer.WinBet(intBetAmount);
 			cout << endl << endl;
-			cout << "************************************************** " << endl;
 		}
 		else if (objDealer.getHandPointValue() > 21 && objPlayer.getHandPointValue() <= 21) {	//Player wins
-			cout << "You win!" << endl;
-			objPlayer.WinBet(dblBetAmount);
+			cout << "\nYOU WIN!" << endl;
+			objPlayer.WinBet(intBetAmount);
+			objDealer.LoseBet(intBetAmount);
 			cout << endl << endl;
 		}
-		else if (objDealer.getHandPointValue() == objPlayer.getHandPointValue()) {	//Push/draw
-			cout << "Push!" << endl;
+		else if (objDealer.getHandPointValue() == objPlayer.getHandPointValue()) {	//Push/draw, dealer still wins
+			cout << "/nDEALER WINS!" << endl;
+			objPlayer.LoseBet(intBetAmount);
+			objDealer.WinBet(intBetAmount);
+			cout << endl << endl;
+		}
+
+		//Dealer is out of money
+		if (objDealer.getMoney() <= 0) {	//Exits game
+			cout << "\nCONGRATS, YOU ROBBED THE DEALER!" << endl;
+			chrPlayAgain = 'n';
+			exit(chrPlayAgain = 'n');
 			cout << endl << endl;
 			cout << "************************************************** " << endl;
 		}
 
-		if (objPlayer.getMoney() > 0) {	//Asks player if they want to play again
-			cout << "Want to play MOAR? Yes(Y/y) or No(N/n)";
+		//Asks player if they want to play again
+		if (objPlayer.getMoney() > 0) {
+			cout << "\nWant to play More? Yes(Y/y) or No(N/n)";
 			cin >> chrPlayAgain;
 			chrPlayAgain = tolower(chrPlayAgain);
 			cout << endl << endl;
 			cout << "************************************************** " << endl;
 
 			if (chrPlayAgain == 'n') {	//Exits game
-				cout << "Peace!" << endl;
+				cout << "Peace out!" << endl;
+				cout << "************************************************** " << endl;
 				exit(chrPlayAgain = 'n');
 			}
 		}
-		else {	//Exits game, no more money
-			cout << "Nope you're broke.. Later" << endl;
+		else {	//Exits game if player is out of money
+			cout << "Nope you're broke.. Go get more money!" << endl;
 			chrPlayAgain = 'n';
 			exit(chrPlayAgain = 'n');
 			cout << endl << endl;

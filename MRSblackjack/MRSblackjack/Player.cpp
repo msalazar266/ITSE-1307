@@ -127,8 +127,8 @@ void Player::clearHand()
 
 void Player::setMoney(int intpMoney)
 {
-	if (intpMoney > 1000000) {
-		intpMoney = 1000000;
+	if (intpMoney > 50000) {
+		intpMoney = 50000;
 	}
 	else if (intpMoney < 0) {
 		intpMoney = 0;
